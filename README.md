@@ -1,343 +1,227 @@
-# 🤖 Orion Effects Social Media Automation
+# Orion Effects Social Media Automation
 
-### AI Assisted Content Generation and Social Media Publishing System
+### Human supervised AI assisted content workflow
 
-An experimental marketing automation system developed by **Orion Effects** to streamline social media content creation, scheduling and publishing using AI, Google Sheets, GitHub Actions and Meta APIs.
+An **Orion Effects Labs** experiment exploring how AI and automation can reduce repetitive social media operations while keeping marketing judgement and final approval with a human.
 
-The system is designed around a simple principle:
-
-> **Automate repetitive execution while keeping humans in control of strategy and approval.**
+> **Automate execution. Keep humans responsible for decisions.**
 
 ---
 
-# 🎯 Project Overview
+## ⚠️ Project status
 
-Creating and publishing social media content consistently can involve a large number of repetitive tasks:
+**Status: Experimental / In development**
+
+This repository currently documents the proposed workflow, setup requirements and implementation direction. Some publishing steps are still placeholders and should **not** be treated as production integrations until they are tested and verified.
+
+That distinction matters. This repository intentionally separates what has been designed from what has been proven in production.
+
+---
+
+## 🎯 What the project is trying to solve
+
+Social content operations can involve repetitive work across:
 
 • Content planning
-• Caption writing
+• Caption preparation
 • Creative direction
-• Image generation
-• Hashtag preparation
-• Scheduling
+• AI assisted generation
+• Human review
 • Publishing
 • Status tracking
 
-This project explores how AI and automation can reduce repetitive work while maintaining human oversight.
-
-The system uses a structured content workflow where content can be prepared, reviewed and marked as ready before automated processing begins.
+The project explores a controlled workflow where automation handles repetitive preparation and execution, while a human remains responsible for brand alignment and approval.
 
 ---
 
-# 🧠 Core Concept
+## 🧠 Intended workflow
 
-The workflow follows this general architecture:
+```text
+Content Planning
+      ↓
+AI Assisted Preparation
+      ↓
+GitHub Review Issue
+      ↓
+Human Approval / Edit / Reject
+      ↓
+Publishing Integration
+      ↓
+Status Tracking
+      ↓
+Performance Feedback
+```
+
+The design is deliberately **human in the loop**. AI should assist the process, not silently publish marketing decisions.
+
+---
+
+## 👤 Human responsibilities
+
+• Marketing strategy
+• Brand positioning
+• Content direction
+• Creative judgement
+• Final approval
+• Quality control
+• Performance interpretation
+
+## ⚙️ Automation responsibilities
+
+• Data movement
+• Workflow orchestration
+• AI assisted content preparation
+• Review issue creation
+• Status updates
+• Publishing operations once integrations are verified
+
+---
+
+## 🧩 Planned architecture
 
 ```text
 Google Sheets
       ↓
-Content Planning
+Content Brief
       ↓
-Human Review
+AI Assisted Processing
       ↓
-AI Content Processing
-      ↓
-Google AI Studio / Gemini
-      ↓
-Content / Creative Generation
+Google Gemini / AI service
       ↓
 GitHub Actions
+      ↓
+Human Review Issue
+      ↓
+Approval
       ↓
 Meta APIs
       ↓
 Instagram + Facebook
       ↓
-Publishing
-      ↓
-Status Tracking
+Content Status / Reporting
 ```
 
-The objective is not to remove humans from the marketing process.
-
-The objective is to remove unnecessary repetitive work.
+The architecture may change as implementation is tested.
 
 ---
 
-# 👤 Human In The Loop
+## 🛠️ Technology direction
 
-Human oversight is an important part of the system.
-
-Marketing strategy, positioning, campaign direction and final approval should remain human controlled.
-
-The automation layer is responsible primarily for execution.
-
-### Human responsibilities
-
-• Marketing strategy
-• Content strategy
-• Brand positioning
-• Content approval
-• Creative direction
-• Quality control
-• Performance analysis
-
-### Automation responsibilities
-
-• Workflow execution
-• Content processing
-• AI assisted generation
-• Data movement
-• Publishing operations
-• Status updates
-
-This creates a **Human + AI + Automation** operating model.
+| Technology | Intended role |
+| --- | --- |
+| GitHub | Source control, documentation and review |
+| GitHub Actions | Workflow orchestration |
+| Google Sheets | Lightweight content planning layer |
+| Google Gemini / AI services | AI assisted content generation |
+| Meta APIs | Planned publishing integration |
+| APIs | System communication |
 
 ---
 
-# ⚙️ Technology Stack
+## 📊 Content model
 
-| Technology                | Purpose                                |
-| ------------------------- | -------------------------------------- |
-| GitHub                    | Version control and project management |
-| GitHub Actions            | Workflow automation                    |
-| Google Sheets             | Content planning and workflow control  |
-| Google AI Studio / Gemini | AI assisted content generation         |
-| Meta APIs                 | Facebook and Instagram publishing      |
-| APIs                      | Communication between systems          |
+The proposed Google Sheets structure includes fields such as:
 
----
+| Field | Purpose |
+| --- | --- |
+| Status | Workflow state such as DRAFT or READY |
+| Topic | Content subject |
+| Description | Content brief |
+| Brand Guidelines | Tone and brand direction |
+| Image Style | Creative direction |
+| Hashtags | Suggested social tags |
+| Image URL | Optional supplied creative |
+| Notes | Additional reviewer context |
+| Publication Date | Publishing record |
 
-# 📊 Content Management
-
-The current workflow uses Google Sheets as a lightweight content management layer.
-
-A content row can contain:
-
-| Column           | Purpose                |
-| ---------------- | ---------------------- |
-| Status           | Workflow state         |
-| Topic            | Content subject        |
-| Description      | Content instructions   |
-| Brand Guidelines | Brand direction        |
-| Image Style      | Creative direction     |
-| Hashtags         | Social media tags      |
-| Publication Date | Publishing information |
-
-### Example status flow
+A possible lifecycle is:
 
 ```text
-DRAFT
-  ↓
-READY
-  ↓
-PROCESSING
-  ↓
-PUBLISHED
+DRAFT → READY → REVIEW → APPROVED → PUBLISHED
+                  ↓
+                REJECTED
 ```
-
-The exact workflow can evolve as the system develops.
 
 ---
 
-# 🔐 Security
+## 🔐 Security principles
 
-API credentials and sensitive configuration values should never be stored directly inside the source code.
+Never commit secrets, API keys, access tokens or passwords to this public repository.
 
-The system is designed to use environment variables and GitHub repository secrets for sensitive credentials.
+Production credentials should be stored using appropriate secret management, such as GitHub Actions secrets or the relevant platform's secure credential system.
 
-Examples include:
-
-```text
-GOOGLE_SHEETS_API_KEY
-GOOGLE_SHEET_ID
-GOOGLE_AI_API_KEY
-INSTAGRAM_ACCESS_TOKEN
-INSTAGRAM_BUSINESS_ACCOUNT_ID
-FACEBOOK_ACCESS_TOKEN
-FACEBOOK_PAGE_ID
-```
-
-### Important
-
-Never commit API keys, access tokens, passwords or other secrets into a public GitHub repository.
-
-Use GitHub Secrets or another appropriate secret management system.
+The repository may reference secret names in documentation, but it must never contain their values.
 
 ---
 
-# 📁 Repository Structure
+## 📁 Repository guide
 
-```text
-orion-social-media-automation/
-│
-├── README.md
-│
-├── HUMAN_IN_LOOP_WORKFLOW.md
-│
-├── QUICK_START.md
-│
-├── SETUP_GOOGLE_SHEETS.md
-│
-└── SETUP_META_API.md
-```
-
-Additional workflow files and automation components can be added as the project evolves.
+• `README.md` — project overview and architecture
+• `HUMAN_IN_LOOP_WORKFLOW.md` — detailed workflow concept
+• `QUICK_START.md` — setup and testing guidance
+• `SETUP_GOOGLE_SHEETS.md` — Google Sheets configuration notes
+• `SETUP_META_API.md` — Meta integration notes
 
 ---
 
-# 🧩 Human In The Loop Workflow
+## 🔬 What we want to learn
 
-The project includes documentation explaining how humans interact with the automation system.
+The project is not only about publishing posts. It is an experiment in operating marketing with better systems.
 
-The intended model is:
+Areas for future testing include:
 
-```text
-Human Strategy
-      ↓
-Content Planning
-      ↓
-Human Review
-      ↓
-AI Assisted Processing
-      ↓
-Automated Execution
-      ↓
-Human Monitoring
-      ↓
-Performance Analysis
-      ↓
-Optimization
-```
+### Content intelligence
 
-This approach helps prevent automation from becoming disconnected from actual business objectives.
+• Content concepts from business objectives
+• Audience and topic signals
+• Content pillar management
+• Reusable prompts and brand context
 
----
+### Creative intelligence
 
-# 🚀 Potential Future Development
-
-This project is currently an experimental foundation.
-
-Future versions may explore:
-
-### AI Content Intelligence
-
-Automatically generate content concepts based on:
-
-• Business objectives
-• Audience interests
-• Content pillars
-• Previous performance
-• Current trends
-
-### Creative Intelligence
-
-AI assisted generation of:
-
-• Image concepts
-• Creative variations
 • Hooks
-• Captions
-• Calls to action
+• Caption variations
+• Creative concepts
+• Platform specific adaptations
 
-### Performance Intelligence
+### Performance intelligence
 
-Connect published content with performance data and identify:
+• Content performance tracking
+• Topic comparisons
+• Creative pattern analysis
+• Feedback loops for future content
 
-• Best performing topics
-• Best performing formats
-• Engagement patterns
-• Audience responses
-• Creative opportunities
+### Workflow intelligence
 
-### Approval System
+• Better approval controls
+• Failure recovery
+• Notifications
+• Multi platform workflows
+• Stronger audit trails
 
-Introduce a stronger approval layer where AI generated content is reviewed before publication.
-
-### Multi Platform Publishing
-
-Potential expansion to additional platforms and channels.
-
----
-
-# 🔬 Orion Effects Labs
-
-This project is part of the broader **Orion Effects Labs** initiative.
-
-The purpose of the Labs is to experiment with practical applications of:
-
-**Artificial Intelligence**
-
-**Marketing Automation**
-
-**Performance Marketing**
-
-**Data**
-
-**Creative Technology**
-
-The objective is to continuously test ideas and turn useful experiments into practical business systems.
+These are **future directions**, not claims that all features already exist.
 
 ---
 
-# 🎯 Business Objective
+## 🚀 Why this project exists
 
-The long term objective is to develop systems that help marketing teams spend less time on repetitive operational work and more time on:
+Orion Effects is interested in the intersection of:
 
-• Strategy
-• Creativity
-• Customer understanding
-• Decision making
-• Business growth
+**Performance Marketing + AI + Automation + Data + Creative Strategy**
+
+The objective is to build practical systems that help marketers spend less time on repetitive operational tasks and more time on strategy, creativity, customer understanding and growth.
 
 ---
 
-# ⚠️ Project Status
+## 🌐 Orion Effects
 
-**Status:** Experimental / In Development
-
-This project is actively evolving.
-
-Features, workflows and integrations may change as new approaches are tested.
-
----
-
-# 🏢 About Orion Effects
-
-**Orion Effects** is a performance marketing and digital growth company focused on:
-
-• Meta Ads
-• Performance Marketing
-• Lead Generation
-• AI Marketing Systems
-• Marketing Automation
-• Creative Strategy
-
-Website:
-
-https://www.orioneffects.com
-
-LinkedIn:
-
-https://www.linkedin.com/in/orioneffects/
-
-Facebook:
-
-https://www.facebook.com/OrionEffects/
-
-TikTok:
-
-https://www.tiktok.com/@orioneffects
+[Website](https://www.orioneffects.com)  
+[LinkedIn](https://www.linkedin.com/in/orioneffects/)  
+[Facebook](https://www.facebook.com/OrionEffects/)  
+[TikTok](https://www.tiktok.com/@orioneffects)
 
 ---
 
-# 📌 Philosophy
+### Build. Test. Learn. Improve.
 
-> **Technology should support better marketing decisions, not replace human judgment.**
-
-Orion Effects combines human expertise with AI and automation to build practical systems for modern marketing.
-
----
-
-## 🚀 Build. Test. Learn. Improve.
-
-**Orion Effects**
+**Orion Effects Labs**
