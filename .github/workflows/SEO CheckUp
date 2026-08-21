@@ -1,0 +1,2 @@
+- name: seo-checkup
+  uses: ikidnapmyself/seo-checkup@v1.1.2
