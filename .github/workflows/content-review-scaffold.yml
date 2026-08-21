@@ -1,0 +1,43 @@
+name: Content Review Scaffold
+
+on:
+  workflow_dispatch:
+    inputs:
+      topic:
+        description: "Content topic for the review issue"
+        required: true
+        type: string
+      caption:
+        description: "Draft caption to review"
+        required: true
+        type: string
+      cta:
+        description: "Optional call to action"
+        required: false
+        type: string
+
+permissions:
+  issues: write
+
+jobs:
+  create-review:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Create human review issue
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const topic = `${{ inputs.topic }}`;
+            const caption = `${{ inputs.caption }}`;
+            const cta = `${{ inputs.cta }}`;
+
+            const body = `## Human Content Review\n\n### Topic\n${topic}\n\n### Draft Caption\n${caption}\n\n### CTA\n${cta || 'Not provided'}\n\n### Review\n\n- [ ] On brand\n- [ ] Factually correct\n- [ ] Clear value proposition\n- [ ] Appropriate creative direction\n- [ ] CTA is relevant\n\n### Decision\n\nComment **/approve** when ready or **/reject** when the draft should not proceed.\n\n> This scaffold creates a review checkpoint only. It does not publish to Instagram or Facebook.`;
+
+            const issue = await github.rest.issues.create({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              title: `Content Review: ${topic}`,
+              body
+            });
+
+            core.info(`Created review issue #${issue.data.number}`);
