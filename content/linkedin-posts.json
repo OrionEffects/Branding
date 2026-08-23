@@ -1,0 +1,15 @@
+{
+  "timezone": "Europe/Lisbon",
+  "posts": [
+    {
+      "id": "example-001",
+      "publish_date": "2026-08-24",
+      "publish_time": "09:00",
+      "status": "DRAFT",
+      "text": "Replace this with your approved LinkedIn post.",
+      "media_url": "",
+      "published_at": "",
+      "linkedin_post_id": ""
+    }
+  ]
+}
