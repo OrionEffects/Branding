@@ -1,0 +1,66 @@
+name: Publish Approved LinkedIn Company Page Post
+
+on:
+  schedule:
+    - cron: "*/5 * * * *"
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: "Run without publishing"
+        required: false
+        default: false
+        type: boolean
+
+permissions:
+  contents: write
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    concurrency:
+      group: linkedin-company-publisher
+      cancel-in-progress: false
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: true
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Dry run check
+        if: ${{ github.event_name == 'workflow_dispatch' && inputs.dry_run }}
+        run: |
+          python - <<'PY'
+          import json
+          from datetime import datetime
+          from zoneinfo import ZoneInfo
+          d=json.load(open('content/linkedin-posts.json'))
+          now=datetime.now(ZoneInfo(d.get('timezone','Europe/Lisbon')))
+          print('Lisbon time:', now.isoformat())
+          print('Due posts:', [p['id'] for p in d['posts'] if p.get('status')=='APPROVED' and p.get('publish_date')==now.date().isoformat() and p.get('publish_time')<=now.strftime('%H:%M') and not p.get('linkedin_post_id')])
+          PY
+
+      - name: Publish due post
+        if: ${{ github.event_name != 'workflow_dispatch' || !inputs.dry_run }}
+        env:
+          LINKEDIN_ACCESS_TOKEN: ${{ secrets.LINKEDIN_ACCESS_TOKEN }}
+          LINKEDIN_ORGANIZATION_URN: ${{ secrets.LINKEDIN_ORGANIZATION_URN }}
+          LINKEDIN_VERSION: "202602"
+        run: python scripts/publish_linkedin_company.py
+
+      - name: Commit publishing status
+        if: ${{ success() && (github.event_name != 'workflow_dispatch' || !inputs.dry_run) }}
+        run: |
+          if git diff --quiet -- content/linkedin-posts.json; then
+            echo "No publishing status changes to commit."
+            exit 0
+          fi
+          git config user.name "Orion Effects Automation"
+          git config user.email "actions@github.com"
+          git add content/linkedin-posts.json
+          git commit -m "Record LinkedIn company page publishing status"
+          git push
