@@ -15,6 +15,11 @@ on:
         description: "Optional call to action"
         required: false
         type: string
+      platform:
+        description: "Publishing platform"
+        required: false
+        default: "LinkedIn"
+        type: string
 
 permissions:
   issues: write
@@ -30,14 +35,39 @@ jobs:
             const topic = `${{ inputs.topic }}`;
             const caption = `${{ inputs.caption }}`;
             const cta = `${{ inputs.cta }}`;
+            const platform = `${{ inputs.platform }}` || 'LinkedIn';
 
-            const body = `## Human Content Review\n\n### Topic\n${topic}\n\n### Draft Caption\n${caption}\n\n### CTA\n${cta || 'Not provided'}\n\n### Review\n\n- [ ] On brand\n- [ ] Factually correct\n- [ ] Clear value proposition\n- [ ] Appropriate creative direction\n- [ ] CTA is relevant\n\n### Decision\n\nComment **/approve** when ready or **/reject** when the draft should not proceed.\n\n> This scaffold creates a review checkpoint only. It does not publish to Instagram or Facebook.`;
+            const body = `## Human Content Review\n\n### Platform\n${platform}\n\n### Topic\n${topic}\n\n### Draft Caption\n${caption}\n\n### CTA\n${cta || 'Not provided'}\n\n### Review\n\n- [ ] On brand\n- [ ] Factually correct\n- [ ] Clear value proposition\n- [ ] Appropriate creative direction\n- [ ] CTA is relevant\n- [ ] Creative/image is ready\n\n### Decision\n\nComment **/approve** when this content is ready for human publishing.\nComment **/reject** if the draft needs revision.\nAfter a human publishes the approved post on LinkedIn, comment **/published**.\n\n> Human-in-loop mode: approval prepares the post for manual LinkedIn publishing. No LinkedIn credentials or Orion Effects email access are required for this stage.`;
 
             const issue = await github.rest.issues.create({
               owner: context.repo.owner,
               repo: context.repo.repo,
               title: `Content Review: ${topic}`,
               body
+            });
+
+            const labels = [
+              { name: 'content-review', color: '1D76DB', description: 'Content awaiting human review' },
+              { name: 'review-required', color: 'FBCA04', description: 'Human decision required before publishing' }
+            ];
+
+            for (const label of labels) {
+              try {
+                await github.rest.issues.getLabel({ owner: context.repo.owner, repo: context.repo.repo, name: label.name });
+              } catch (error) {
+                if (error.status === 404) {
+                  await github.rest.issues.createLabel({ owner: context.repo.owner, repo: context.repo.repo, ...label });
+                } else {
+                  throw error;
+                }
+              }
+            }
+
+            await github.rest.issues.addLabels({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: issue.data.number,
+              labels: ['content-review', 'review-required']
             });
 
             core.info(`Created review issue #${issue.data.number}`);
