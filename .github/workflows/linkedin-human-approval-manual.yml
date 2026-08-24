@@ -1,0 +1,84 @@
+name: LinkedIn Human Approval Manual
+
+on:
+  workflow_dispatch:
+    inputs:
+      issue_number:
+        description: "Content review issue number"
+        required: true
+        type: string
+      decision:
+        description: "approve, reject, or published"
+        required: true
+        type: choice
+        options:
+          - approve
+          - reject
+          - published
+
+permissions:
+  issues: write
+  contents: read
+
+jobs:
+  decision:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Process human decision
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const owner = context.repo.owner;
+            const repo = context.repo.repo;
+            const issue_number = Number(`${{ inputs.issue_number }}`);
+            const decision = `${{ inputs.decision }}`;
+
+            const labelDefs = {
+              'content-review': { color: '1D76DB', description: 'Content review workflow item' },
+              'review-required': { color: 'FBCA04', description: 'Human decision required before publishing' },
+              'ready-to-publish': { color: '0E8A16', description: 'Human approved and ready for manual publishing' },
+              'rejected': { color: 'D93F0B', description: 'Content rejected and requires revision' },
+              'published': { color: '5319E7', description: 'Human confirmed the post was published' }
+            };
+
+            async function ensureLabel(name) {
+              try {
+                await github.rest.issues.getLabel({ owner, repo, name });
+              } catch (error) {
+                if (error.status === 404) {
+                  await github.rest.issues.createLabel({ owner, repo, name, ...labelDefs[name] });
+                } else throw error;
+              }
+            }
+
+            async function removeLabelIfPresent(name) {
+              try {
+                await github.rest.issues.removeLabel({ owner, repo, issue_number, name });
+              } catch (error) {
+                if (error.status !== 404) throw error;
+              }
+            }
+
+            for (const name of Object.keys(labelDefs)) await ensureLabel(name);
+
+            if (decision === 'approve') {
+              await removeLabelIfPresent('review-required');
+              await removeLabelIfPresent('rejected');
+              await github.rest.issues.addLabels({ owner, repo, issue_number, labels: ['content-review', 'ready-to-publish'] });
+              await github.rest.issues.createComment({ owner, repo, issue_number, body: '✅ **Approved — Ready to Publish**\n\nPublish manually on the Orion Effects LinkedIn Company Page, then run this workflow again with decision **published**.' });
+            }
+
+            if (decision === 'reject') {
+              await removeLabelIfPresent('ready-to-publish');
+              await github.rest.issues.addLabels({ owner, repo, issue_number, labels: ['content-review', 'review-required', 'rejected'] });
+              await github.rest.issues.createComment({ owner, repo, issue_number, body: '🔁 **Revision required**\n\nThis item is blocked from publishing until it is approved again.' });
+            }
+
+            if (decision === 'published') {
+              await removeLabelIfPresent('ready-to-publish');
+              await removeLabelIfPresent('review-required');
+              await removeLabelIfPresent('rejected');
+              await github.rest.issues.addLabels({ owner, repo, issue_number, labels: ['content-review', 'published'] });
+              await github.rest.issues.createComment({ owner, repo, issue_number, body: '🚀 **Published confirmed**\n\nHuman publishing has been recorded.' });
+              await github.rest.issues.update({ owner, repo, issue_number, state: 'closed', state_reason: 'completed' });
+            }
